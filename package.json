@@ -1,0 +1,25 @@
+{
+  "name": "personal-finance-assistance-ai-agent",
+  "version": "1.0.0",
+  "description": "Personal Finance Assistance is  an AI Agent that will help user in tracking there expenses and help in general queries related to finance using reasoning model with custom tools.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --env-file=.env agent.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/afsarzan/Personal-Finance-Assistance-AI-Agent.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/afsarzan/Personal-Finance-Assistance-AI-Agent/issues"
+  },
+  "homepage": "https://github.com/afsarzan/Personal-Finance-Assistance-AI-Agent#readme",
+  "dependencies": {
+    "groq-sdk": "^0.34.0"
+  }
+}
