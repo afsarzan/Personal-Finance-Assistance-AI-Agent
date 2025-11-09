@@ -31,8 +31,18 @@ const port = 3033;
 
 app.post("/getLlmResponse", async (req, res) => {
   const responseFromAgent = await callAgent(req.body.message);
-  console.log({ responseFromAgent });
+  // console.log({ responseFromAgent });
   res.json({ response: responseFromAgent });
+});
+
+
+/**
+ * get total balance
+ */
+
+app.get("/getBalance", (req, res) => {
+  const balance = getMoneyBalance();
+  res.json({ balance });
 });
 
 app.listen(port, () => {

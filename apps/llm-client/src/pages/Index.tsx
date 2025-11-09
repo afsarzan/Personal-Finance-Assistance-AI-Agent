@@ -1,12 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FinancialOverview from "@/components/FinancialOverview";
 import ChatInterface from "@/components/ChatInterface";
 
 const Index = () => {
   // Sample financial data - in a real app, this would come from a database
-  const [balance] = useState(12458.32);
   const [income] = useState(5200.0);
   const [expenses] = useState(3150.75);
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchBalance = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:3033/getBalance');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setBalance(data.balance);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching balance:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,7 +69,7 @@ const Index = () => {
               AI Assistant
             </h2>
             <div className="flex-1 min-h-0">
-              <ChatInterface />
+              <ChatInterface fetchBalance={fetchBalance}/>
             </div>
           </div>
         </div>

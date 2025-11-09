@@ -10,7 +10,7 @@ interface Message {
   content: string;
 }
 
-const ChatInterface = () => {
+const ChatInterface = ({fetchBalance}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +95,7 @@ const ChatInterface = () => {
       console.error("Error fetching LLM response:", error);
     } finally {
       setIsLoading(false);
+      fetchBalance()
     }
   };
 
