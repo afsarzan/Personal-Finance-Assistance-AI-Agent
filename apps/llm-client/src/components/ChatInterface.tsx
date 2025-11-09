@@ -11,13 +11,7 @@ interface Message {
 }
 
 const ChatInterface = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content:
-        "Hello! I'm your personal finance assistant. Ask me anything about managing your money, budgeting, or financial planning.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,17 +25,33 @@ const ChatInterface = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getLLMData("");
+      const userMessage: Message = { role: "system", content: data.response };
+      setMessages((prev) => [...prev, userMessage]);
+    };
+
+    fetchData();
+  }, []);
+
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, { role: "user", content: input }]);
     setInput("");
     setIsLoading(true);
 
     try {
-      const { data, error } = [[], null];
+      const data = await getLLMData(input);
+      console.log("data:", data);
 
+      const assistantMessage: Message = {
+        role: "system",
+        content: data.response,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
       if (error) {
         console.error("Error calling finance-chat:", error);
 
@@ -82,22 +92,26 @@ const ChatInterface = () => {
         ]);
         return;
       }
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: data.response,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error("Error:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Error fetching LLM response:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getLLMData = async (userMessage: string) => {
+    const res = await fetch("http://localhost:3033/getLlmResponse", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: userMessage }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    return await res.json();
   };
 
   return (
