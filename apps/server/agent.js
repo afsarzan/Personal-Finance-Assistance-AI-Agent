@@ -1,8 +1,22 @@
 import { Groq } from "groq-sdk";
-import readline from "node:readline/promises";
+import express from 'express';
+import cors from 'cors';
+
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
+
+
+const app = express()
+const port = 3000
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
 
 const expenseDB = [];
 const incomeDB = [];
@@ -32,24 +46,21 @@ async function callAgent() {
   //   content: "How much money I have spent this month?",
   // });
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
 
-  while (true) {
+
+  // while (true) {
     // reading from termi
-    const question = await rl.question(
-      "Enter your message (or 'exit' to quit): "
-    );
+    // const question = await rl.question(
+    //   "Enter your message (or 'exit' to quit): "
+    // );
 
-    if (question.toLowerCase() === "exit") {
-      break;
-    }
+    // if (question.toLowerCase() === "exit") {
+    //   break;
+    // }
 
-    messages.push({ role: "user", content: question });
+    // messages.push({ role: "user", content: question });
 
-    while (true) {
+    // while (true) {
       const completion = await groq.chat.completions.create({
         messages,
         model: "openai/gpt-oss-20b",
@@ -130,35 +141,37 @@ async function callAgent() {
 
       if (!tool_calls) {
         console.log("Final Response:", completion.choices[0].message.content);
-        break;
+        // break;
       }
-
-      for (const tool of tool_calls) {
-        const functionName = tool.function.name;
-        const functionArgs = JSON.parse(tool.function.arguments);
-        let result = "";
-        // console.log({ functionName, functionArgs });
-        if (functionName === "getTotalExpense") {
-          result = getTotalExpense(functionArgs);
-          // console.log(`Total expense from ${args.from} to ${args.to}: $${result}`);
-        } else if (functionName === "getAddExpense") {
-          result = addExpense(functionArgs);
-        } else if (functionName === "addIncome") {
-          result = addIncome(functionArgs);
-        } else if (functionName === "getMoneyBalance") {
-          result = getMoneyBalance(functionArgs);
+      if (tool_calls) {
+        for (const tool of tool_calls) {
+          const functionName = tool.function.name;
+          const functionArgs = JSON.parse(tool.function.arguments);
+          let result = "";
+          // console.log({ functionName, functionArgs });
+          if (functionName === "getTotalExpense") {
+            result = getTotalExpense(functionArgs);
+            // console.log(`Total expense from ${args.from} to ${args.to}: $${result}`);
+          } else if (functionName === "getAddExpense") {
+            result = addExpense(functionArgs);
+          } else if (functionName === "addIncome") {
+            result = addIncome(functionArgs);
+          } else if (functionName === "getMoneyBalance") {
+            result = getMoneyBalance(functionArgs);
+          }
+  
+          messages.push({
+            role: "tool",
+            tool_call_id: tool.id,
+            name: functionName,
+            content: result.toString(),
+          });
         }
-
-        messages.push({
-          role: "tool",
-          tool_call_id: tool.id,
-          name: functionName,
-          content: result.toString(),
-        });
       }
-    }
-  }
-  rl.close();
+
+    // }
+  // }
+  // rl.close();
   // console.log({ messages });
   // console.log({ expenseDB });
 }

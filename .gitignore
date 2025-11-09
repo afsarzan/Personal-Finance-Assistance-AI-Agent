@@ -1,2 +1,27 @@
-node_modules
+```
+
+#### Update root `.gitignore`:
+```
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Turbo
+.turbo/
+
+# Environment
 .env
+.env*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
